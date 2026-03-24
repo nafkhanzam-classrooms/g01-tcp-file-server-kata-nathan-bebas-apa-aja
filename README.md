@@ -520,4 +520,93 @@ except Exception as e:
 
 - Ini merupakan bagian yang akan menangani client jika terjadi error. Server akan langsung memutuskan koneksi dan menghapus client dari _notified_socket_
 
+### File `server-select.py`
+
+- File ini merupakan program sisi server yang dijalankan untuk menerima dan melayani koneksi dari banyak client secara bersamaan. File ini sangat mirip dengan `server-select.py`. Perbedaannya, program ini menggunakan mekanisme select.poll() sebagai teknik I/O multiplexing-nya. poll adalah bentuk evolusi dari select yang dirancang untuk mengatasi beberapa kelemahan select, terutama saat server harus menangani koneksi dalam jumlah yang sangat besar.
+
+```py
+import socket
+import select
+import os
+
+HOST = '127.0.0.1'
+PORT = 12345
+BUFFER_SIZE = 4096
+SERVER_DIR = 'server_storage'
+
+if not os.path.exists(SERVER_DIR):
+    os.makedirs(SERVER_DIR)
+```
+-
+
+```py
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+server_socket.bind((HOST, PORT))
+server_socket.listen(5)
+```
+
+-
+
+```py
+fd_to_socket = {server_socket.fileno(): server_socket}
+clients = {}
+upload_states = {}
+```
+
+-
+
+```py
+poller = select.poll()
+poller.register(server_socket, select.POLLIN)
+
+print(f"Server berjalan pada {HOST}:{PORT}")
+print(f"Menyimpan file di: ./{SERVER_DIR}/")
+```
+
+-
+
+```py
+def broadcast(message, sender_socket):
+    for client_socket in clients.keys():
+        if client_socket != sender_socket:
+            try:
+                client_socket.send(message)
+            except:
+                clean_up(client_socket)
+```
+
+-
+
+```py
+def clean_up(sock):
+    fd = sock.fileno()
+    if fd in fd_to_socket:
+        poller.unregister(fd)
+        del fd_to_socket[fd]
+    if sock in clients:
+        print(f"Memutuskan koneksi dengan {clients[sock]}")
+        del clients[sock]
+    if sock in upload_states:
+        upload_states[sock]['file'].close()
+        del upload_states[sock]
+    sock.close()
+```
+
+-
+
+```py
+
+```
+
+-
+
+```py
+except Exception as e:
+                    clean_up(notified_socket)
+```
+
+-
+
+
 ## Screenshot Hasil
