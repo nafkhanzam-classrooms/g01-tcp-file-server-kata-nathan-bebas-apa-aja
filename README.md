@@ -361,7 +361,7 @@ if not os.path.exists(SERVER_DIR):
     os.makedirs(SERVER_DIR)
 ```
 
-- 
+- Bagian kode tersebut merupakan _import library_ yang akan digunakan pada program ini. Kemudian dilanjutkan dengan inisialisasi host, port, ukuran buffer dan nama direktori server yang akan digunakan.
 
 ```py
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -379,7 +379,7 @@ upload_states = {}
 print(f"Select-based Server berjalan pada {HOST}:{PORT}")
 print(f"Menyimpan file di: ./{SERVER_DIR}/")
 ```
--
+- Bagian kode tersebut merupakan inisialisasi _dictionary_ variabel yang akan digunakan.
 
 ```py
 def broadcast(message, sender_socket):
@@ -393,7 +393,7 @@ def broadcast(message, sender_socket):
                     sockets_list.remove(client_socket)
 ```
 
--
+- Ini merupakan bagian _broadcast_, yaitu bagian dari kode yang berfungsi untuk mengirimkan _broadcast_ pada seluruh client. _Broadcast_ akan dikirimkan pada seluruh client kecuali pengirimnya atau server. Jika _broadcast_ gagal dikirim , server akan langsung menutup koneksi dan menghapus client tersebut dari _sockets_list_.
 
 ```py
 while True:
@@ -444,7 +444,11 @@ while True:
                     raise ConnectionResetError
 ```
 
--
+- Ini merupakan loop utama yang membuat server dapat berjalan terus-menerus. Fungsi `select.select` akan memblokir program sampai ada satu atau lebih socket di dalam _sockets_list_ yang siap dibaca. Hasilnya dimasukkan ke read_sockets. Looping for _notified_socket_ akan memproses satu per satu socket yang sedang aktif tersebut. Jika socket yang menyala adalah _server_socket_, server akan mencatat socket barunya ke sockets_list dan client.
+- Bagian else pada potongan kode tersebut berfungsi untuk mengecek jika client yang terhubung sedang berada di dalam proses upload atau tidak. Jika sedang dalam proses upload, maka data yang masuk dibaca sebagai data biner.
+- Pada potongan kode selanjutnya, yaitu pada if state selanjutnya, berfungsi untuk menangani data yang mungkin akan tertinggal atau tidak terkirim. Apabila terjadi hal seperti demikian, program akan mengirimkan ulang pesan yang belum terkirim.
+
+Perintah continue memastikan bahwa sisa looping di bawahnya diabaikan, dan server kembali memantau select.
 
 ```py
 msg = data.decode('utf-8', errors='ignore').strip()
