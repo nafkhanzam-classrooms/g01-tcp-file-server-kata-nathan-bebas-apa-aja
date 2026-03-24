@@ -497,7 +497,10 @@ msg = data.decode('utf-8', errors='ignore').strip()
                     formatted_msg = f"[{clients[notified_socket]}]: {msg}\n".encode('utf-8')
                     broadcast(formatted_msg, notified_socket)
 ```
--
+- Bagian ini merupakan bagian yang berisi perintah yang dapat dijalankan oleh client. Program menggunakan percabangan if-elif-else untuk menentukan tindakan berdasarkan kata pertama yang diketik user:
+    - /list: Melihat isi brankas server.
+    - /upload: Server mencatat status persiapan (ukuran dan nama file), lalu membalas READY_UPLOAD agar client mulai mengirim data biner. Ini memicu logika di Bagian 7 pada putaran select berikutnya.
+    - /download: Server mencari file, jika ketemu, langsung membanjiri client dengan data biner menggunakan sendall().
 
 ```py
 except Exception as e:
@@ -517,6 +520,6 @@ except Exception as e:
         notified_socket.close()
 ```
 
--
+- Ini merupakan bagian yang akan menangani client jika terjadi error. Server akan langsung memutuskan koneksi dan menghapus client dari _notified_socket_
 
 ## Screenshot Hasil
