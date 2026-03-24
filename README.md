@@ -448,8 +448,6 @@ while True:
 - Bagian else pada potongan kode tersebut berfungsi untuk mengecek jika client yang terhubung sedang berada di dalam proses upload atau tidak. Jika sedang dalam proses upload, maka data yang masuk dibaca sebagai data biner.
 - Pada potongan kode selanjutnya, yaitu pada if state selanjutnya, berfungsi untuk menangani data yang mungkin akan tertinggal atau tidak terkirim. Apabila terjadi hal seperti demikian, program akan mengirimkan ulang pesan yang belum terkirim.
 
-Perintah continue memastikan bahwa sisa looping di bawahnya diabaikan, dan server kembali memantau select.
-
 ```py
 msg = data.decode('utf-8', errors='ignore').strip()
 
