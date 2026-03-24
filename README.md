@@ -4,8 +4,8 @@
 ## Anggota Kelompok
 | Nama           | NRP        | Kelas     |
 | ---            | ---        | ----------|
-|                |            |           |
-|                |            |           |
+|Nathanael Oliver Amadhika Yuswana|5025241109|D|
+|Rennard Filbert Tanjaya|5025241122|D|
 
 ## Link Youtube (Unlisted)
 Link ditaruh di bawah ini
