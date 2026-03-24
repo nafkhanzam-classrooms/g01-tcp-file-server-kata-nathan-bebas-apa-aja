@@ -178,5 +178,46 @@ if __name__ == '__main__':
     main()
 ```
 - Ini adalah fungsi main dari kode ini. Fungsi ini yang akan membaca input dari user di terminal. Jika inputnya `/upload` maka akan ngejalankan funsgi upload yang sudah dibuat diatas. Jika printah lain maka langsung kirim ke server. Karena `/upload` perlu fungsi sendiri karena butuh handshake 2 langkah. Semua command lain (`/list`, `/download`, chat biasa) cukup dikirim sebagai teks.
-  
+
+### File `server-select.py`
+
+- File ini merupakan program sisi server yang dijalankan untuk menerima koneksi dari banyak client secara bersamaan. Tugas utamanya adalah mendengarkan permintaan masuk, memproses command atau pesan yang dikirim oleh client, dan mengirimkan _response_ atau meneruskan _message_ tersebut ke client lainnya. Server diprogram menggunakan modul select sehingga dapat memantau banyak socket sekaligus di dalam satu thread utama tanpa mengalami blocking.
+
+```py
+import socket
+import select
+import os
+
+HOST = '127.0.0.1'
+PORT = 12345
+BUFFER_SIZE = 4096
+SERVER_DIR = 'server_storage'
+
+if not os.path.exists(SERVER_DIR):
+    os.makedirs(SERVER_DIR)
+```
+
+- 
+
+```py
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+server_socket.bind((HOST, PORT))
+server_socket.listen(5)
+```
+-
+
+```py
+sockets_list = [server_socket]
+clients = {}
+upload_states = {}
+
+print(f"Select-based Server berjalan pada {HOST}:{PORT}")
+print(f"Menyimpan file di: ./{SERVER_DIR}/")
+```
+-
+
+```py
+
+
 ## Screenshot Hasil
