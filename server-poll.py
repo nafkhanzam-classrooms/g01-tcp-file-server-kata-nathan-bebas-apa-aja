@@ -1,13 +1,11 @@
 import socket
 import select
 import os
-import time
 
 HOST = '127.0.0.1'
 PORT = 12345
 BUFFER_SIZE = 4096
 SERVER_DIR = 'server_storage'
-EOF_MARKER = b"<END_OF_FILE>"
 
 if not os.path.exists(SERVER_DIR):
     os.makedirs(SERVER_DIR)
@@ -37,8 +35,8 @@ def broadcast(message, sender_socket):
 
 def clean_up(sock):
     fd = sock.fileno()
-    poller.unregister(fd)
     if fd in fd_to_socket:
+        poller.unregister(fd)
         del fd_to_socket[fd]
     if sock in clients:
         print(f"Memutuskan koneksi dengan {clients[sock]}")
@@ -78,24 +76,32 @@ while True:
                         
                         if not data:
                             raise ConnectionResetError
+                        
+                        remaining = state['expected'] - state['received']
+                        chunk = data[:remaining]
+                        leftover = data[remaining:]
 
-                        if EOF_MARKER in data:
-                            clean_data = data.replace(EOF_MARKER, b"")
-                            state['file'].write(clean_data)
+                        state['file'].write(chunk)
+                        state['received'] += len(chunk)
+                        
+                        if state['received'] >= state['expected']:
                             state['file'].close()
-                            
-                            print(f"Berhasil menerima {state['filename']} dari {clients[notified_socket]}")
-                            notified_socket.send(b"Server: Upload selesai.\n")
+                            print(f"[SUCCESS] Menerima '{state['filename']}' dari {clients[notified_socket]}")
+                            notified_socket.send(b"Server: Upload berhasil.\n")
                             del upload_states[notified_socket]
-                        else:
-                            state['file'].write(data)
+                            
+                            if leftover:
+                                msg = leftover.decode('utf-8', errors='ignore').strip()
+                                if msg:
+                                    formatted_msg = f"[{clients[notified_socket]}]: {msg}\n".encode('utf-8')
+                                    broadcast(formatted_msg, notified_socket)
                         continue
-
+                    
                     data = notified_socket.recv(BUFFER_SIZE)
                     if not data:
                         raise ConnectionResetError
 
-                    msg = data.decode('utf-8').strip()
+                    msg = data.decode('utf-8', errors='ignore').strip()
 
                     if msg == '/list':
                         files = os.listdir(SERVER_DIR)
@@ -104,12 +110,15 @@ while True:
 
                     elif msg.startswith('/upload'):
                         parts = msg.split()
-                        if len(parts) == 2:
+                        if len(parts) == 3:
                             filename = parts[1]
+                            filesize = int(parts[2])
                             filepath = os.path.join(SERVER_DIR, os.path.basename(filename))
 
                             upload_states[notified_socket] = {
                                 'filename': filename,
+                                'expected': filesize,
+                                'received': 0,
                                 'file': open(filepath, 'wb')
                             }
                             notified_socket.send(b"READY_UPLOAD\n") 
@@ -123,15 +132,13 @@ while True:
                             filepath = os.path.join(SERVER_DIR, filename)
                             
                             if os.path.exists(filepath):
-                                notified_socket.send(f"READY_DOWNLOAD {filename}\n".encode('utf-8'))
-                                time.sleep(0.1) 
+                                filesize = os.path.getsize(filepath)
+                                notified_socket.send(f"READY_DOWNLOAD {filename} {filesize}\n".encode('utf-8'))
+                                
                                 
                                 with open(filepath, 'rb') as f:
                                     while (chunk := f.read(BUFFER_SIZE)):
                                         notified_socket.sendall(chunk)
-                                
-                                time.sleep(0.1) 
-                                notified_socket.sendall(EOF_MARKER)
                             else:
                                 notified_socket.send(b"Error: File not found.\n")
                         else:
@@ -142,5 +149,4 @@ while True:
                         broadcast(formatted_msg, notified_socket)
 
                 except Exception as e:
-                    print(f"Error with {clients[notified_socket]}: {e}")
                     clean_up(notified_socket)
