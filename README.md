@@ -914,9 +914,13 @@ except Exception as e:
 ## Screenshot Hasil
 
 ### File `server-sync.py`
+<img width="1471" height="748" alt="image" src="https://github.com/user-attachments/assets/3c74b15a-d528-42cc-8836-2e5df7d6eb0f" />
 
 
 ### File `server-thread.py`
+<img width="1484" height="757" alt="image" src="https://github.com/user-attachments/assets/dd6663ef-52b8-45ac-9125-48d66d087ed5" />
+
+
 ### File `server-select.py`
 <img width="717" height="346" alt="image" src="https://github.com/user-attachments/assets/fdfc5c8b-af8a-48df-b02d-0dfd7c80501b" />
 <img width="734" height="422" alt="image" src="https://github.com/user-attachments/assets/27e6cef7-3d92-4f91-b449-9f397525ae48" />
