@@ -67,7 +67,6 @@ while True:
                         notified_socket.send(b"Server: Upload berhasil.\n")
                         del upload_states[notified_socket]
                         
-                        # Jika ada sisa data setelah file, proses sebagai pesan chat
                         if leftover:
                             msg = leftover.decode('utf-8', errors='ignore').strip()
                             if msg:
