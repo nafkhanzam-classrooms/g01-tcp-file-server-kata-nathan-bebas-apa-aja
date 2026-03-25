@@ -918,5 +918,15 @@ except Exception as e:
 
 ### File `server-thread.py`
 ### File `server-select.py`
+<img width="717" height="346" alt="image" src="https://github.com/user-attachments/assets/fdfc5c8b-af8a-48df-b02d-0dfd7c80501b" />
+<img width="734" height="422" alt="image" src="https://github.com/user-attachments/assets/27e6cef7-3d92-4f91-b449-9f397525ae48" />
+<img width="716" height="412" alt="image" src="https://github.com/user-attachments/assets/afc09139-2d8e-44be-8bba-5d8b04fbf716" />
+
+
 ### File `server-poll.py`
+<img width="733" height="360" alt="image" src="https://github.com/user-attachments/assets/2da92940-3609-4ac9-a9e3-34fceaae3b1b" />
+<img width="733" height="419" alt="image" src="https://github.com/user-attachments/assets/8d369f91-7735-4b62-8866-811c8f17141f" />
+<img width="836" height="467" alt="image" src="https://github.com/user-attachments/assets/06531822-bc70-416c-8838-8c3689e5aab0" />
+<img width="730" height="415" alt="image" src="https://github.com/user-attachments/assets/38f50158-627a-4124-ad90-78acf614b93a" />
+
 
