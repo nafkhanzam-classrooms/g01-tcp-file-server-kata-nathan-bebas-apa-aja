@@ -786,20 +786,129 @@ def clean_up(sock):
     sock.close()
 ```
 
--
+- Bagian `clean_up` berfungsi untuk memutuskan dan membersihkan koneksi dari client yang sudah tidak terhubung dengan server atau mengalami error.
 
 ```py
+while True:
+    events = poller.poll()
 
+    for fd, flag in events:
+        notified_socket = fd_to_socket[fd]
+
+        if flag & (select.POLLHUP | select.POLLERR):
+            clean_up(notified_socket)
+            continue
+
+        if flag & select.POLLIN:
+            if notified_socket == server_socket:
+                client_socket, client_address = server_socket.accept()
+                
+                fd_to_socket[client_socket.fileno()] = client_socket
+                clients[client_socket] = client_address
+                poller.register(client_socket, select.POLLIN)
+                
+                print(f"Accepted {client_address}")
+                broadcast(f"User {client_address} bergabung!\n".encode('utf-8'), client_socket)
+                client_socket.send(b"Welcome! Commands: /list, /upload <filename>, /download <filename>\n")
+                
+            else:
+                try:
+                    if notified_socket in upload_states:
+                        state = upload_states[notified_socket]
+                        data = notified_socket.recv(BUFFER_SIZE)
+                        
+                        if not data:
+                            raise ConnectionResetError
+                        
+                        remaining = state['expected'] - state['received']
+                        chunk = data[:remaining]
+                        leftover = data[remaining:]
+
+                        state['file'].write(chunk)
+                        state['received'] += len(chunk)
+                        
+                        if state['received'] >= state['expected']:
+                            state['file'].close()
+                            print(f"[SUCCESS] Menerima '{state['filename']}' dari {clients[notified_socket]}")
+                            notified_socket.send(b"Server: Upload berhasil.\n")
+                            del upload_states[notified_socket]
+                            
+                            if leftover:
+                                msg = leftover.decode('utf-8', errors='ignore').strip()
+                                if msg:
+                                    formatted_msg = f"[{clients[notified_socket]}]: {msg}\n".encode('utf-8')
+                                    broadcast(formatted_msg, notified_socket)
+                        continue
+                    
+                    data = notified_socket.recv(BUFFER_SIZE)
+                    if not data:
+                        raise ConnectionResetError
 ```
 
--
+- Ini merupakan loop utama yang membuat server dapat berjalan terus-menerus. Fungsi `select.poll` akan memblokir program sampai ada satu atau lebih socket dengan pasangan flag dan client socket yang ready. Hasilnya dimasukkan ke read_sockets. Apabila socket mengalami _error_ atau melakukan _hang up_, maka koneksi akan diputuskan. Jika socket yang menyala adalah _server_socket_, server akan mencatat socket barunya ke sockets_list dan client.
+- Bagian else pada potongan kode tersebut berfungsi untuk mengecek jika client yang terhubung sedang berada di dalam proses upload atau tidak. Jika sedang dalam proses upload, maka data yang masuk dibaca sebagai data biner.
+- Pada potongan kode selanjutnya, yaitu pada if state selanjutnya, berfungsi untuk menangani data yang mungkin akan tertinggal atau tidak terkirim. Apabila terjadi hal seperti demikian, program akan mengirimkan ulang pesan yang belum terkirim.
+
+```py
+msg = data.decode('utf-8', errors='ignore').strip()
+
+                    if msg == '/list':
+                        files = os.listdir(SERVER_DIR)
+                        file_list = "\n".join(files) if files else "Tidak ada files pada server."
+                        notified_socket.send(f"Files di server:\n{file_list}\n".encode('utf-8'))
+
+                    elif msg.startswith('/upload'):
+                        parts = msg.split()
+                        if len(parts) == 3:
+                            filename = parts[1]
+                            filesize = int(parts[2])
+                            filepath = os.path.join(SERVER_DIR, os.path.basename(filename))
+
+                            upload_states[notified_socket] = {
+                                'filename': filename,
+                                'expected': filesize,
+                                'received': 0,
+                                'file': open(filepath, 'wb')
+                            }
+                            notified_socket.send(b"READY_UPLOAD\n") 
+                        else:
+                            notified_socket.send(b"Usage: /upload <filename>\n")
+
+                    elif msg.startswith('/download'):
+                        parts = msg.split()
+                        if len(parts) == 2:
+                            filename = os.path.basename(parts[1])
+                            filepath = os.path.join(SERVER_DIR, filename)
+                            
+                            if os.path.exists(filepath):
+                                filesize = os.path.getsize(filepath)
+                                notified_socket.send(f"READY_DOWNLOAD {filename} {filesize}\n".encode('utf-8'))
+                                
+                                
+                                with open(filepath, 'rb') as f:
+                                    while (chunk := f.read(BUFFER_SIZE)):
+                                        notified_socket.sendall(chunk)
+                            else:
+                                notified_socket.send(b"Error: File not found.\n")
+                        else:
+                            notified_socket.send(b"Usage: /download <filename>\n")
+
+                    else:
+                        formatted_msg = f"[{clients[notified_socket]}]: {msg}\n".encode('utf-8')
+                        broadcast(formatted_msg, notified_socket)
+```
+
+- Bagian ini merupakan bagian yang berisi perintah yang dapat dijalankan oleh client. Program menggunakan percabangan if-elif-else untuk menentukan tindakan berdasarkan kata pertama yang diketik user:
+    - /list: Melihat isi brankas server.
+    - /upload: Server mencatat status persiapan (ukuran dan nama file), lalu membalas READY_UPLOAD agar client mulai mengirim data biner. Ini memicu logika di Bagian 7 pada putaran select berikutnya.
+    - /download: Server mencari file, jika ketemu, langsung membanjiri client dengan data biner menggunakan sendall().
 
 ```py
 except Exception as e:
                     clean_up(notified_socket)
 ```
 
--
+- Ini merupakan bagian yang akan menangani client jika terjadi error. Server akan langsung memutuskan koneksi dan menghapus client dari _notified_socket_
 
 
 ## Screenshot Hasil
