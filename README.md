@@ -1,4 +1,4 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/mRmkZGKe)
+ [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/mRmkZGKe)
 # Network Programming - Assignment G01
 
 ## Anggota Kelompok
@@ -561,7 +561,8 @@ server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server_socket.bind((HOST, PORT))
 server_socket.listen(5)
 ```
--
+- Bagian kode tersebut merupakan inisialisasi socket yang akan digunakan. Program ini menggunakan TCP Stream, serta memungkinkan server untuk menggunakan kembali port yang sama. Pada program server, jumlah client yang dapat terhubung dibatasi sebanyak 5 client.
+=
 
 ```py
 sockets_list = [server_socket]
@@ -712,7 +713,7 @@ except Exception as e:
 
 - Ini merupakan bagian yang akan menangani client jika terjadi error. Server akan langsung memutuskan koneksi dan menghapus client dari _notified_socket_
 
-### File `server-select.py`
+### File `server-poll.py`
 
 - File ini merupakan program sisi server yang dijalankan untuk menerima dan melayani koneksi dari banyak client secara bersamaan. File ini sangat mirip dengan `server-select.py`. Perbedaannya, program ini menggunakan mekanisme select.poll() sebagai teknik I/O multiplexing-nya. poll adalah bentuk evolusi dari select yang dirancang untuk mengatasi beberapa kelemahan select, terutama saat server harus menangani koneksi dalam jumlah yang sangat besar.
 
@@ -729,7 +730,7 @@ SERVER_DIR = 'server_storage'
 if not os.path.exists(SERVER_DIR):
     os.makedirs(SERVER_DIR)
 ```
--
+- Bagian kode tersebut merupakan _import library_ yang akan digunakan pada program ini. Kemudian dilanjutkan dengan inisialisasi host, port, ukuran buffer dan nama direktori server yang akan digunakan.
 
 ```py
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -738,7 +739,7 @@ server_socket.bind((HOST, PORT))
 server_socket.listen(5)
 ```
 
--
+- Bagian kode tersebut merupakan inisialisasi socket yang akan digunakan. Program ini menggunakan TCP Stream, serta memungkinkan server untuk menggunakan kembali port yang sama. Pada program server, jumlah client yang dapat terhubung dibatasi sebanyak 5 client.
 
 ```py
 fd_to_socket = {server_socket.fileno(): server_socket}
@@ -746,7 +747,7 @@ clients = {}
 upload_states = {}
 ```
 
--
+- Bagian kode tersebut merupakan inisialisasi _dictionary_ variabel yang akan digunakan.
 
 ```py
 poller = select.poll()
@@ -756,7 +757,7 @@ print(f"Server berjalan pada {HOST}:{PORT}")
 print(f"Menyimpan file di: ./{SERVER_DIR}/")
 ```
 
--
+- Ini merupakan bagian inisialisasi poll yang akan digunakan, di mana server dan clientnya akan di-_input_ ke dalam `poller.register`.
 
 ```py
 def broadcast(message, sender_socket):
@@ -768,7 +769,7 @@ def broadcast(message, sender_socket):
                 clean_up(client_socket)
 ```
 
--
+- Ini merupakan bagian _broadcast_, yaitu bagian dari kode yang berfungsi untuk mengirimkan _broadcast_ pada seluruh client. _Broadcast_ akan dikirimkan pada seluruh client kecuali pengirimnya atau server. Jika _broadcast_ gagal dikirim , server akan langsung menutup koneksi dan menghapus client tersebut dari _sockets_list_.
 
 ```py
 def clean_up(sock):
