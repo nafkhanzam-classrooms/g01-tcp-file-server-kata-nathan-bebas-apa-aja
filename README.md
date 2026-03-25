@@ -689,9 +689,9 @@ msg = data.decode('utf-8', errors='ignore').strip()
                     broadcast(formatted_msg, notified_socket)
 ```
 - Bagian ini merupakan bagian yang berisi perintah yang dapat dijalankan oleh client. Program menggunakan percabangan if-elif-else untuk menentukan tindakan berdasarkan kata pertama yang diketik user:
-    - /list: Melihat isi brankas server.
-    - /upload: Server mencatat status persiapan (ukuran dan nama file), lalu membalas READY_UPLOAD agar client mulai mengirim data biner. Ini memicu logika di Bagian 7 pada putaran select berikutnya.
-    - /download: Server mencari file, jika ketemu, langsung membanjiri client dengan data biner menggunakan sendall().
+    - /list: Melihat isi direktori server.
+    - /upload: Server mencatat status persiapan (ukuran dan nama file), lalu membalas READY_UPLOAD agar client melakukan _upload_/mengirim data biner.
+    - /download: Server mencari file, jika ketemu, langsung mengirim data biner pada client untuk melakukan download.
 
 ```py
 except Exception as e:
@@ -899,9 +899,9 @@ msg = data.decode('utf-8', errors='ignore').strip()
 ```
 
 - Bagian ini merupakan bagian yang berisi perintah yang dapat dijalankan oleh client. Program menggunakan percabangan if-elif-else untuk menentukan tindakan berdasarkan kata pertama yang diketik user:
-    - /list: Melihat isi brankas server.
-    - /upload: Server mencatat status persiapan (ukuran dan nama file), lalu membalas READY_UPLOAD agar client mulai mengirim data biner. Ini memicu logika di Bagian 7 pada putaran select berikutnya.
-    - /download: Server mencari file, jika ketemu, langsung membanjiri client dengan data biner menggunakan sendall().
+    - /list: Melihat isi direktori server.
+    - /upload: Server mencatat status persiapan (ukuran dan nama file), lalu membalas READY_UPLOAD agar client melakukan _upload_/mengirim data biner.
+    - /download: Server mencari file, jika ketemu, langsung mengirim data biner pada client untuk melakukan download.
 
 ```py
 except Exception as e:
