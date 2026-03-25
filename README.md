@@ -10,7 +10,7 @@
 ## Link Youtube (Unlisted)
 Link ditaruh di bawah ini
 ```
-
+https://youtu.be/hdirfTW6irw
 ```
 
 ## Penjelasan Program
@@ -802,3 +802,11 @@ except Exception as e:
 
 
 ## Screenshot Hasil
+
+### File `server-sync.py`
+
+
+### File `server-thread.py`
+### File `server-select.py`
+### File `server-poll.py`
+
